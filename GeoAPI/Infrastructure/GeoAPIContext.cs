@@ -12,13 +12,17 @@ namespace Infrastructure
     {
         public DbSet<User> Users { get; set; }
         public GeoAPIContext(DbContextOptions<GeoAPIContext> options) : base(options)
-        { }
+        {
+            if (this.Database.GetPendingMigrations().Any())
+            {
+                this.Database.Migrate();
+            }
+        }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         { }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            //builder.Entity<User>().HasData(new User { Username = "admin" }); 
             builder.Entity<User>().ToTable("Users");
             builder.Entity<User>().HasKey(u => u.Username);
             builder.Entity<User>().Property(u => u.Username).HasMaxLength(20);
