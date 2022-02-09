@@ -2,6 +2,7 @@
 using Domain;
 using Domain.Entities;
 using Infrastructure.Helpers;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,15 +16,18 @@ namespace Infrastructure.Services.Interfaces
     {
         private GeoAPIContext _context;
         private IHttpClientFactory _clientFactory;
-        public GeoService(GeoAPIContext context, IHttpClientFactory clientFactory)
+        private IConfiguration _configuration;
+        public GeoService(GeoAPIContext context, IHttpClientFactory clientFactory, IConfiguration configuration)
         {
             _context = context;
             _clientFactory = clientFactory;
+            _configuration = configuration;
         }
         
         public async Task<Location> GetLocation(string provinceName)
         {
-            ProvinceData provinceData = await _clientFactory.GetRequest<ProvinceData>("https://apis.datos.gob.ar/georef/api/provincias", $"nombre={provinceName}");
+            var apiUrl = _configuration.GetSection("PublicUrls").GetSection("APIProvincias").Value;
+            ProvinceData provinceData = await _clientFactory.GetRequest<ProvinceData>(apiUrl, $"nombre={provinceName}");
             return provinceData.provincias.First().centroide;
         }
     }
